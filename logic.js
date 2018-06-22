@@ -1,9 +1,3 @@
-// Creating map object
-var myMap = L.map("map", {
-  center: [37.09, -95.71],
-  zoom: 3
-});
-
 // Adding tile layer
 var outdoorsmap = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
 		accessToken: 'pk.eyJ1IjoiYWl5YW44NzMyIiwiYSI6ImNqaWR2YmFweTBmc3AzcXMwMmsyc2ZjZW4ifQ.jQUXA445gno_CK_at6QgcQ',
@@ -11,14 +5,28 @@ var outdoorsmap = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.
     id: 'mapbox.outdoors',
 		maxZoom: 18,
 		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-	})
-	.addTo(myMap);
+  });
+  
+var satellitesmap = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+  accessToken: 'pk.eyJ1IjoiYWl5YW44NzMyIiwiYSI6ImNqaWR2YmFweTBmc3AzcXMwMmsyc2ZjZW4ifQ.jQUXA445gno_CK_at6QgcQ',
+  id: 'mapbox.satellite',
+  maxZoom: 18,
+  attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+});
 
+var lightmap = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+  accessToken: 'pk.eyJ1IjoiYWl5YW44NzMyIiwiYSI6ImNqaWR2YmFweTBmc3AzcXMwMmsyc2ZjZW4ifQ.jQUXA445gno_CK_at6QgcQ',
+  id: 'mapbox.light',
+  maxZoom: 18,
+  attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+});
+  
 // Define a markerSize function that will give each earthquate a different radius based on its magnitude
 function markerSize(mag) {
   return mag * 4;
 }
 
+// define a fillcolor function to assign a color to different magnitude
 function fillColor(mag) {
   if (mag < 1) {
     return "#8BC34A";
@@ -44,7 +52,7 @@ d3.json(APILink, function(data) {
   console.log(data);
 
   // Creating a GeoJSON layer with the retrieved data
-  var earthquake = L.geoJson(data, {
+  var earthquakes = L.geoJson(data, {
     pointToLayer: function (feature, latlng) {
       return L.circleMarker(latlng, {
         radius: markerSize(feature.properties.mag),
@@ -59,6 +67,33 @@ d3.json(APILink, function(data) {
       layer.bindPopup(feature.properties.place + "<br>Earthquake magnitude: "
         + feature.properties.mag);
     }
+  });
+  // .addTo(myMap);
+
+  // Define a baseMaps object to hold our base layers
+  var baseMaps = {
+    "Satellites Map": satellitesmap,
+    "Outdoors Map": outdoorsmap,
+    "Light Map": lightmap
+  };
+
+  // Create overlay object to hold our overlay layer
+  var overlayMaps = {
+    Earthquakes: earthquakes
+  };
+
+  // Creating map object
+  var myMap = L.map("map", {
+    center: [37.09, -95.71],
+    zoom: 3,
+    layers: [satellitesmap, earthquakes]
+  });
+
+  // Create a layer control
+  // Pass in our baseMaps and overlayMaps
+  // Add the layer control to the map
+  L.control.layers(baseMaps, overlayMaps, {
+    collapsed: false
   }).addTo(myMap);
 
   // Setting up the legend
@@ -73,7 +108,6 @@ d3.json(APILink, function(data) {
         div.innerHTML +=
             "<i style=\"background:" + colors[i] + "\"></i>" + mags[i] + '<br>';
     }
-
     return div;
   };
 
