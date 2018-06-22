@@ -20,15 +20,15 @@ function markerSize(mag) {
 }
 
 function fillColor(mag) {
-  if (mag<1) {
+  if (mag < 1) {
     return "#8BC34A";
-  } else if (mag<2) {
+  } else if (mag < 2) {
     return "#CDDC39";
-  } else if (mag<3) {
+  } else if (mag < 3) {
     return "#FFEB3B";
-  } else if (mag<4) {
+  } else if (mag < 4) {
     return "#FFC107";
-  } else if (mag<5) {
+  } else if (mag < 5) {
     return "#FF9800";
   } else {
     return "#FF5722";
@@ -67,9 +67,13 @@ d3.json(APILink, function(data) {
     var div = L.DomUtil.create("div", "info legend");
     var colors = ["#8BC34A","#CDDC39","#FFEB3B","#FFC107","#FF9800","#FF5722"];
     var mags = ["0-1","1-2","2-3","3-4","4-5","5+"];
+
+    // loop through our magnitude intervals and generate a label with a colored square for each interval
     for (var i = 0; i < colors.length; i++) {
-      div.innerHTML += "<li style=\"background-color: " + colors[i] + "\"></li>" + mags[i] + "<br>"
+        div.innerHTML +=
+            "<i style=\"background:" + colors[i] + "\"></i>" + mags[i] + '<br>';
     }
+
     return div;
   };
 
